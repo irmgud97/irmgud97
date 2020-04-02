@@ -1,3 +1,8 @@
+% 'Money balance system', The main point of this code right now should be : 1. we have a file from which we read all the information and we plot a 
+
+
+
+
 close all
 clc
 %geting files from web
@@ -98,6 +103,7 @@ end
 SameChanges2=num2cell(SameChanges,1); 
 GetCRID=MyInfoCurrencyTo{1,2}; % ????
 GiveCRID=MyInfoCurrencyTo{1,1}; % ??
+
 % what the hell is here
 Mypairinfo=[];
 Otherspairinfo=[];
@@ -132,7 +138,7 @@ review=num2cell(raw,1); %numeriai i cell'us
 %decide which 
 
 
-MyReviewIndex=find(strcmp(MyExchangername,review{2})); %Ieskom vienodu nurodytu komentaru skaiciaus ?
+MyReviewIndex=find(strcmp(MyExchangername,review{2})); %Its searching for the same comments ?
 Myinfoinreview=cellfun(@(c) c(MyReviewIndex),review,'uni',0); %Funkcija pritaikom kaip ir prie6tai 
 xxx=raw;
 xxx(MyReviewIndex,:)=[];

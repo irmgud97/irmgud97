@@ -1,0 +1,257 @@
+close all
+clc
+%geting files from web
+url = 'http://www.bestchange.ru/bm/info.zip';
+unzip(url,cd)
+global ALL_rates_data_search kaupiam ChainSize
+fileID = fopen('bm_cy.dat','r','n','windows-1251');
+C1 = textscan(fileID,'%n %n %s %s %s %s %s ','Delimiter',';','EmptyValue',NaN);
+fclose(fileID);
+% ID currency | xx | Name of currency | xx; xx; xx
+fileID = fopen('bm_exch.dat','r','n','windows-1251');
+C2 = textscan(fileID,'%n %s %s %s %s  ','Delimiter',';','EmptyValue',NaN);
+fclose(fileID);
+% ID_from _Curr | ID_to_Curr | ID_CHANGER | rate GIVE | rate GET | Reserve | xx | xx
+%displaying
+disp('== Market Data Reading Done ==')
+LC1=length(C1);
+LC2=length(C2);
+LC3=length(C3);
+prompt = 'Iveskite keitejo pavadinima '; %write exchanger name 'Changer'
+MyExchangername=input(prompt,'s');
+MyIndex=strmatch(MyExchangername,C2{2},'exact');
+if isempty(MyIndex)==1
+ disp('Wrong Exchanger name');
+ return
+else
+ disp(['Exchanger name - ',num2str( MyExchangername)]);
+MyID=C2{1}(MyIndex);
+end
+prompt = 'Iveskite teigiamu atsiliepimu skaiciu ';
+interestingreviews=input(prompt);
+MyIndexC3=strmatch(MyID,C3{3});
+MyinfoC2=cellfun(@(c) c(MyIndex), C2, 'uni',0 );
+MyinfoC3=cellfun(@(c) c(MyIndexC3), C3, 'uni',0 );
+%Curancies we need
+InterestedCurrency1='USD'; 
+InterestedCurrency2='EUR';
+InterestedCurrency3='RUB';
+IndexIC1=find(contains(C1{3},InterestedCurrency1));
+IndexIC2=find(contains(C1{3},InterestedCurrency2));
+IndexIC3=find(contains(C1{3},InterestedCurrency3));
+%no need
+NotInterested1='USDT';
+NotInterested2='USDC';
+NotInterested3='TUSD';
+IndexNOT1=find(contains(C1{3},NotInterested1));
+IndexNOT2=find(contains(C1{3},NotInterested2));
+IndexNOT3=find(contains(C1{3},NotInterested3));
+% ????
+IndexIC1=setdiff(IndexIC1,IndexNOT1);
+IndexIC1=setdiff(IndexIC1,IndexNOT2);
+IndexIC1=setdiff(IndexIC1,IndexNOT3);
+IC1ID=C1{1}(IndexIC1); %arrays ?????
+IC2ID=C1{1}(IndexIC2);
+IC3ID=C1{1}(IndexIC3);
+InterestedCurrencyID=[IC1ID;IC2ID;IC3ID];
+IDC2WM=setdiff(C2{1},MyID);
+IndexOthersC3=find(ismember(C3{3},IDC2WM));
+ExchangersInfo=cellfun(@(c) c(IndexOthersC3),C3,'uni',0); %duodam funkcija 3 stulpeliui
+IndexFromCurrency=find(ismember(ExchangersInfo{1},InterestedCurrencyID)); %grazinam vieneta jei echangersinfo randam interstedcurancy
+InterestedFromCurrencyInfo=cellfun(@(c)c(IndexFromCurrency),ExchangersInfo,'uni',0);
+IndexToCurrency=find(ismember(InterestedFromCurrencyInfo{2},InterestedCurrencyID));
+InterestedToCurrencyInfo=cellfun(@(c) c(IndexToCurrency),InterestedFromCurrencyInfo,'uni',0);
+IndexMyFromCurrency=find(ismember(MyinfoC3{1},InterestedCurrencyID));
+MyInfoCurrencyFrom=cellfun(@(c) c(IndexurrencyTo),(MyFromCurrency),MyinfoC3, 'uni',0);
+IndexMyToCurrency=find(ismember(MyInfoCurrencyFrom{2},InterestedCurrencyID));
+MyInfoCurrencyTo=cellfun(@(c) c(IndexMyToCurrency),MyInfoCurrencyFrom,'uni',0);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%professor send this line
+for a=1:8 % 8 because in code there was 8 ????
+    %maybe it should be  i=1:8
+Rate_tmp(i)=ALL_rates_data(iB,5)/ALL_rates_data(iB,4); %get/give 
+%I should write this in array ?? GetdivGive(a)=Rate_tmp(i)
+%i=i+1
+%Amount_tmp=ALL_rates_data(iB,6);%or max from 4,5,6 columns
+end
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+A=cell2mat(InterestedToCurrencyInfo); 
+B=cell2mat(MyInfoC);
+SameChanges=[]; %matrica
+x=1;
+for i=1:length(A)
+ for j=1:length(B)
+ if A(i,1)==B(j,1) && A(i,2)==B(j,2)
+
+ for z=1:8
+ SameChanges(x,z)=A(i,z);
+ end
+ x=x+1;
+ end
+ end
+end
+SameChanges2=num2cell(SameChanges,1); 
+GetCRID=MyInfoCurrencyTo{1,2}; % ????
+GiveCRID=MyInfoCurrencyTo{1,1}; % ??
+% what the hell is here
+Mypairinfo=[];
+Otherspairinfo=[];
+x=1;
+for j=1:length(GetCRID)
+for i=1:length(SameChanges)
+ if SameChanges(i,1)==GiveCRID(j,1) && SameChanges(i,2)==GetCRID(j,1)
+ for z=1:8
+ Otherspairinfo(x,z)=SameChanges(i,z); 
+ end
+ x=x+1;
+ end
+end
+end
+x=1;
+for j=1:length(GetCRID)
+for i=1:length(B)
+ if B(i,1)==GiveCRID(j,1) && B(i,2)==GetCRID(j,1)
+ for z=1:8
+ Mypairinfo(x,z)=B(i,z);
+ end
+ x=x+1;
+ end
+end
+end
+indexforpoly=0;
+[num,txt,raw]=xlsread('reviews4.xlsx'); %reading execl ???
+review=num2cell(raw,1); %numeriai i cell'us
+
+
+%as i understand theres the code made to read reviews  and by reviews to
+%decide which 
+
+
+MyReviewIndex=find(strcmp(MyExchangername,review{2})); %Ieskom vienodu nurodytu komentaru skaiciaus ?
+Myinfoinreview=cellfun(@(c) c(MyReviewIndex),review,'uni',0); %Funkcija pritaikom kaip ir prie6tai 
+xxx=raw;
+xxx(MyReviewIndex,:)=[];
+beta=[];
+for i=1:length(xxx)
+ beta(i)=xxx{i,11};
+end
+indexes=find(isnan(beta));
+Othersinfoinreview=xxx;
+Othersinfoinreview(indexes,:)=[];
+
+othernameindexes1=[0];
+othernameindexes2=[0];
+for ggg=1:length(Mypairinfo)
+othernameindexes2=vertcat(othernameindexes2,find(C3{1,2}==Mypairinfo(ggg,2)));
+othernameindexes1=vertcat(othernameindexes1,find(C3{1,1}==Mypairinfo(ggg,1)));
+end
+othernameindexesz=intersect(othernameindexes1,othernameindexes2);
+othernameindexesz(1,:)=[];
+OthernameID=cellfun(@(c) c(othernameindexesz),C3,'uni',0);
+for j=1:size(Othersinfoinreview)
+ for i=1:length(C2{2})
+ if isequal(C2{1,2}{i,1},Othersinfoinreview{j,2})==1
+ Othersinfoinreview{j,13}=C2{1,1}(i,1);
+ end
+ end
+end
+indexes3=find(isnan(Othersinfoinreview{13}));
+Othersinfoinreview(indexes3,:)=[];
+Otherspairinfo(:,9)=NaN;
+for i=1:length(OthernameID{1})
+ for j=1:length(Othersinfoinreview)
+ if isequal(OthernameID{1,3}(i,1),Othersinfoinreview{j,13})==1
+ Othersinfoinreview{j,14}=Othersinfoinreview{j,13};
+ end
+ end
+end
+for j=1:length(Otherspairinfo)
+ for i=1:size(Othersinfoinreview)
+ if isequal(Othersinfoinreview{i,14},Otherspairinfo(j,3))==1
+ Otherspairinfo(j,9)=Othersinfoinreview{i,11};
+ end
+
+ end
+end
+indexes4=find(isnan(Otherspairinfo(:,9)));
+Otherspairinfo(indexes4,:)=[];
+
+% Cia pasibaigia komentaru skaitymas?????
+
+% Grafiku keitimo kursas nuou rezervo dalis
+for zzz=1:length(Mypairinfo)
+indexgive=find(C1{1,1}==Mypairinfo(zzz,1));
+indexget=find(C1{1,1}==Mypairinfo(zzz,2));
+GiveCR=(C1{1,3}(indexgive,1));
+GetCR=(C1{1,3}(indexget,1));
+figure(zzz)
+p2=[];
+p3=[];
+for i=1:length(Otherspairinfo)%Jei tai yra komentaru dalis, tai mums ja reikia trinti
+if Mypairinfo(zzz,1)==Otherspairinfo(i,1) && Mypairinfo(zzz,2)==Otherspairinfo(i,2)
+ if Otherspairinfo(i,4)==1 && Otherspairinfo(i,9)>=interestingreviews
+ p2=plot(Otherspairinfo(i,6),Otherspairinfo(i,5),'*r');
+ Otherspairinfo(i,10)=Otherspairinfo(i,5);
+ hold on
+ grid on
+ else if Otherspairinfo(i,5)==1 && Otherspairinfo(i,9)>=interestingreviews
+ p2=plot(Otherspairinfo(i,6),1/Otherspairinfo(i,4),'*r');
+ hold on
+ grid on
+ Otherspairinfo(i,10)=1/Otherspairinfo(i,4);
+ else if Otherspairinfo(i,5)==1 && Otherspairinfo(i,9)<interestingreviews
+ p3=plot(Otherspairinfo(i,6),1/Otherspairinfo(i,4),'hb');
+ hold on
+ grid on
+ Otherspairinfo(i,10)=1/Otherspairinfo(i,4);
+ else if Otherspairinfo(i,4)==1 && Otherspairinfo(i,5)~=1 && Otherspairinfo(i,9)<interestingreviews p3=plot(Otherspairinfo(i,6),Otherspairinfo(i,5),'hb');
+ hold on
+ grid on
+ Otherspairinfo(i,10)=Otherspairinfo(i,5);
+ end
+ end
+ end
+ end
+end
+end
+end
+%trintumem iki cia, nes kiek suvokiu cia pasibaigia komentaru dalis
+
+
+
+
+if Mypairinfo(zzz,5)==1
+ p1=plot(Mypairinfo(zzz,6),1/Mypairinfo(zzz,4),'om');
+ hold on
+ grid on
+ Mypairinfo(zzz,9)=1/Mypairinfo(zzz,4);
+else
+ p1=plot(Mypairinfo(zzz,6),Mypairinfo(zzz,5),'om');
+ hold on
+ grid on
+ Mypairinfo(zzz,9)=Mypairinfo(zzz,5);
+end
+ title(['Iš ', GiveCR, ' Į ', GetCR]);
+xlabel('Pinigų rezervas');
+ylabel('Keitimo kursas');
+if isempty(p2)==1 && isempty(p3)==0
+ legend([p1(1),p3(1)],sprintf('Mano keitimo kursas(%s)',MyExchangername),sprintf('Kitų keityklų keitimo kursas'),'Location','Best')
+hold off
+else if isempty(p2)==0 && isempty(p3)==1
+legend([p1(1),p2(1)],sprintf('Mano keitimo kursas(%s)',MyExchangername),sprintf('Kitų keityklų keitimokursas'),'Location','Best')
+hold off
+else if isempty(p2)==1 && isempty(p3)==1
+ legend(p1(1),sprintf('Mano keitimo kursas (%s)',MyExchangername))
+ hold off
+ else if isempty(p2)==0 && isempty(p3)==0
+ legend([p1(1),p2(1),p3(1)],sprintf('Mano keitimo kursas(%s)',MyExchangername),sprintf('Konkurentų sant. turint reikiama ats.sk.'),sprintf('Konkurentų sant. neturint reikiamo ats. sk.'),'Location','Best')
+ hold off
+     end
+    end
+ end
+end
